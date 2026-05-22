@@ -1,6 +1,6 @@
 ---
 name: modal-parallel-search
-description: Use this skill when an agent needs free/no-key web search through a Modal-powered parallel search CLI, including one query with many results or multiple queries fanned out across serverless containers.
+description: Use this skill when an agent needs free/no-key web search through a Modal-powered parallel search CLI, including one query with many results, multiple queries fanned out across serverless containers, Markdown research notes, optional page fetch/extract, or sequential-vs-parallel benchmarks.
 license: MIT
 ---
 
@@ -69,12 +69,38 @@ modal run scripts/modal_search_cli.py \
 - `--region us-en`: search region passed to DDGS.
 - `--safesearch moderate`: safe search setting. Valid values: `on`, `moderate`, `off`.
 - `--timelimit d|w|m|y`: optional time filter for day, week, month, or year.
+- `--fetch-pages`: fetch top result pages and extract readable text.
+- `--fetch-top-n N`: number of top results per query to fetch. Default: `3`.
+- `--fetch-chars N`: max extracted characters per fetched page. Default: `4000`.
+- `--output-format markdown|json`: Markdown is the default for human-readable, LLM-friendly notes; JSON is available for tool parsing.
+- `--benchmark`: run a sequential-vs-parallel wall-time comparison for the same query set.
 
 ## Recommended Defaults
 
 Keep `--backend auto` unless the user asks to benchmark or isolate engines.
 
 Use `--max-results` when the agent needs broader coverage for a single query. Use `--query "q1;;q2;;q3"`, `--queries-json`, or `--queries-file` when the agent needs multiple angles searched in parallel.
+
+Default output is Markdown because it is readable and easy for LLMs to continue working with. Add `--output-format json` only when another tool needs structured JSON.
+
+Use page fetch/extract when snippets are not enough:
+
+```bash
+modal run scripts/modal_search_cli.py \
+  --query "Modal web endpoints examples" \
+  --max-results 5 \
+  --fetch-pages \
+  --fetch-top-n 3
+```
+
+Use benchmarking when you need to show the wall-time benefit of parallel fan-out:
+
+```bash
+modal run scripts/modal_search_cli.py \
+  --queries-json '["Modal serverless Python pricing", "Modal web endpoints Python", "Modal volumes cache examples"]' \
+  --max-results 3 \
+  --benchmark
+```
 
 ## Validation
 

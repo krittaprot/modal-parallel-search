@@ -2,9 +2,9 @@
 
 <img width="1280" height="760" alt="modal-parallel-search-fast-demo" src="https://github.com/user-attachments/assets/df6cc148-fe51-4044-a5e8-4aac801529af" />
 
-> Give your coding agent a tiny web-search superpower: one CLI command fans many searches out across Modal serverless containers and returns clean JSON.
+> Give your coding agent a tiny web-search superpower: one CLI command fans many searches out across Modal serverless containers and returns clean Markdown notes by default, or JSON when requested.
 
-`modal-parallel-search` is a Pi skill + Modal app for agentic web search. It is intentionally small: no browser, no API keys for search, no hosted service to maintain. Your agent shells out to `modal run`, Modal spins up lightweight Python containers, each query runs independently, and the results come back in one JSON payload.
+`modal-parallel-search` is a Pi skill + Modal app for agentic web search. It is intentionally small: no browser, no API keys for search, no hosted service to maintain. Your agent shells out to `modal run`, Modal spins up lightweight Python containers, each query runs independently, and the results come back as human-readable Markdown notes by default, or as JSON with `--output-format json`.
 
 Although this repo ships as a Pi package, the core idea is **not Pi-specific**. We built this skill for any AI coding agent with terminal access: OpenClaw, Hermes, Codex, Claude Code, Pi, and so on. If the agent can run a shell command, it can use this Modal-powered CLI.
 
@@ -22,7 +22,7 @@ It also makes the workflow portable. Once Modal auth is set up, the same command
 
 - **Parallel by default** — send 1 query or 20 angles; each query gets its own Modal function call.
 - **More breadth, faster** — parallel searches let agents explore multiple phrasings, sources, and angles at once, which speeds up wide web research and increases the breadth of information gathered.
-- **Agent-friendly output** — structured JSON, easy to grep, parse, summarize, or cite.
+- **Agent-friendly output** — Markdown notes by default for humans and LLMs; structured JSON is available with `--output-format json`.
 - **No search API key required** — powered by [`ddgs`](https://pypi.org/project/ddgs/) backends.
 - **Tiny surface area** — one Python file and one skill file.
 - **Tiny serverless footprint** — `ddgs` is lightweight, and each Modal search container only needs a small CPU/memory slice for a short burst, so typical runs cost extremely close to zero.
@@ -237,6 +237,11 @@ Then ask Pi to use the skill, or invoke it explicitly:
 --region         Search region [default: us-en]
 --safesearch     on, moderate, off [default: moderate]
 --timelimit      d, w, m, y
+--fetch-pages    Fetch and extract top result pages [default: false]
+--fetch-top-n    Top results per query to fetch [default: 3]
+--fetch-chars    Max extracted characters per page [default: 4000]
+--output-format  markdown or json [default: markdown]
+--benchmark      Compare sequential vs parallel wall time [default: false]
 ```
 
 Show help:
@@ -245,13 +250,56 @@ Show help:
 modal run skills/modal-parallel-search/scripts/modal_search_cli.py --help
 ```
 
+## Page fetch + extract mode
+
+Search results usually include title, URL, and snippet. When you want deeper context, add `--fetch-pages` to fetch the top results for each query in parallel and attach extracted readable text.
+
+```bash
+modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --query "Modal serverless pricing examples" \
+  --max-results 5 \
+  --fetch-pages \
+  --fetch-top-n 3
+```
+
+Markdown output is the default because it is easy for humans and LLMs to continue working with. Use JSON if another tool needs a structured payload:
+
+```bash
+modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --query "Modal serverless pricing examples" \
+  --fetch-pages \
+  --output-format json
+```
+
+## Markdown research notes
+
+By default, the CLI prints Markdown notes grouped by query, with source URLs, snippets, and optional fetched page extracts. This makes the output directly useful as a research scratchpad for coding agents.
+
+```bash
+modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --queries-json '["Modal Python serverless", "Modal web endpoints"]' \
+  --max-results 3
+```
+
+## Benchmark examples
+
+Use `--benchmark` to compare sequential query execution against the default parallel fan-out. The benchmark runs the same query set sequentially and in parallel, then reports wall-clock timings and speedup.
+
+```bash
+modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --queries-file examples/benchmark_queries.txt \
+  --max-results 3 \
+  --benchmark
+```
+
 ## How it works
 
 1. The local entrypoint parses one or many queries.
 2. Each query becomes a serializable search spec.
 3. The CLI calls `search_one.spawn(...)` for every query.
 4. Modal runs each search in a separate lightweight container.
-5. Results are collected in input order and printed as JSON.
+5. Optional page fetch mode calls `fetch_page.spawn(...)` for top result URLs and extracts readable text.
+6. Results are collected in input order and printed as Markdown by default, or JSON with `--output-format json`.
 
 The remote image is deliberately minimal:
 
@@ -263,6 +311,26 @@ image = (
 ```
 
 ## Example output shape
+
+Default Markdown output:
+
+```md
+# Search research notes
+
+- Queries: 1
+- Wall time: 2.481s
+
+## 1. Modal Python serverless
+
+Found 3 results in 1.882s.
+
+### 1.1. Modal: High-performance AI infrastructure
+Source: https://modal.com/...
+
+Snippet text...
+```
+
+JSON output with `--output-format json`:
 
 ```json
 {
@@ -295,15 +363,13 @@ image = (
 │       └── scripts/
 │           └── modal_search_cli.py
 └── examples/
+    ├── benchmark_queries.txt
     └── queries.txt
 ```
 
 ## Roadmap ideas
 
-- Optional page fetch + extract mode for top results.
 - Result caching in a Modal Volume.
-- Markdown output mode for human-readable research notes.
-- Agent benchmark examples: single query vs parallel query wall time.
 
 ## License
 
