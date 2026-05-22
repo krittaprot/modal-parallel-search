@@ -24,18 +24,33 @@ It also makes the workflow portable. Once Modal auth is set up, the same command
 - **No search API key required** — powered by [`ddgs`](https://pypi.org/project/ddgs/) backends.
 - **Tiny surface area** — one Python file and one skill file.
 - **Tiny serverless footprint** — `ddgs` is lightweight, and each Modal search container only needs a small CPU/memory slice for a short burst, so typical runs cost extremely close to zero.
-- **Pi package ready** — install from GitHub and expose it as `/skill:modal-parallel-search`.
+- **Agent Skills ready** — place the skill folder at `~/.agents/skills/modal-parallel-search` and any compatible agent can find it.
 
 > Note: you still need a Modal account/CLI. Modal usage may be billed depending on your account, free credits, and current Modal pricing. The workload is intentionally tiny, but always check your own usage. Please respect search provider terms and rate limits.
 
 ## Quick start
 
+Install the skill into the shared Agent Skills folder, install Modal, then run a smoke test:
+
 ```bash
-git clone https://github.com/krittaprot/modal-parallel-search.git
-cd modal-parallel-search
+curl -fsSL https://raw.githubusercontent.com/krittaprot/modal-parallel-search/main/scripts/install-skill.sh | bash
 uv tool install modal
 modal setup
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --query "Modal Python serverless" \
+  --max-results 1
 ```
+
+The important path is:
+
+```text
+~/.agents/skills/modal-parallel-search/
+├── SKILL.md
+└── scripts/
+    └── modal_search_cli.py
+```
+
+Any AI agent with terminal access can use that folder. Agent Skills-aware tools can load `SKILL.md`; simpler terminal agents can directly run the Python CLI.
 
 ## First-time Modal setup
 
@@ -127,9 +142,74 @@ modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
   --queries-file examples/queries.txt
 ```
 
-## Install as a Pi package
+## Install as an agent skill
 
-Pi can install packages directly from git:
+### Recommended: one-command install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/krittaprot/modal-parallel-search/main/scripts/install-skill.sh | bash
+```
+
+This keeps the full repo checkout here:
+
+```text
+~/.agents/skills/.repos/modal-parallel-search
+```
+
+And symlinks the actual skill folder here:
+
+```text
+~/.agents/skills/modal-parallel-search
+```
+
+The skill folder is the part agents need. `SKILL.md` should be directly inside it:
+
+```text
+~/.agents/skills/modal-parallel-search/
+├── SKILL.md
+└── scripts/
+    └── modal_search_cli.py
+```
+
+### Manual install
+
+If you do not want to pipe a script into `bash`, run the same steps manually:
+
+```bash
+mkdir -p ~/.agents/skills/.repos
+git clone https://github.com/krittaprot/modal-parallel-search.git \
+  ~/.agents/skills/.repos/modal-parallel-search
+rm -rf ~/.agents/skills/modal-parallel-search
+ln -s ~/.agents/skills/.repos/modal-parallel-search/skills/modal-parallel-search \
+  ~/.agents/skills/modal-parallel-search
+```
+
+### Use from any terminal-capable agent
+
+Any AI agent that can run shell commands can call the CLI directly:
+
+```bash
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --query "recent Modal serverless agent examples"
+```
+
+Agent Skills-compatible tools can additionally read:
+
+```text
+~/.agents/skills/modal-parallel-search/SKILL.md
+```
+
+### Update later
+
+```bash
+git -C ~/.agents/skills/.repos/modal-parallel-search pull
+```
+
+The symlink at `~/.agents/skills/modal-parallel-search` keeps pointing at the updated skill folder.
+
+### Pi package alternative
+
+If you prefer Pi's package manager instead, this also works:
 
 ```bash
 pi install git:github.com/krittaprot/modal-parallel-search
@@ -140,8 +220,6 @@ Then ask Pi to use the skill, or invoke it explicitly:
 ```text
 /skill:modal-parallel-search search recent Modal serverless agent examples
 ```
-
-Pi discovers the skill from `skills/modal-parallel-search/SKILL.md` via the `package.json` manifest.
 
 ## CLI options
 
@@ -204,6 +282,8 @@ image = (
 ```text
 .
 ├── package.json
+├── scripts/
+│   └── install-skill.sh
 ├── skills/
 │   └── modal-parallel-search/
 │       ├── SKILL.md
