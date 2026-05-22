@@ -118,7 +118,7 @@ Never commit token values to this repo.
 
 ```bash
 modal token info
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+modal run scripts/modal_search_cli.py \
   --query "Modal Python serverless" \
   --max-results 1
 ```
@@ -126,7 +126,7 @@ modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
 Run a single search:
 
 ```bash
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+modal run scripts/modal_search_cli.py \
   --query "Modal Python serverless coding agents" \
   --max-results 3
 ```
@@ -134,7 +134,7 @@ modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
 Run several searches in parallel:
 
 ```bash
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+modal run scripts/modal_search_cli.py \
   --queries-json '["pi coding agent", "Modal serverless Python", "coding agents CLI tools"]' \
   --max-results 5 \
   --timelimit w
@@ -143,7 +143,7 @@ modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
 Or with a file:
 
 ```bash
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+modal run scripts/modal_search_cli.py \
   --queries-file examples/queries.txt
 ```
 
@@ -247,7 +247,7 @@ Then ask Pi to use the skill, or invoke it explicitly:
 Show help:
 
 ```bash
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py --help
+modal run scripts/modal_search_cli.py --help
 ```
 
 ## Page fetch + extract mode
@@ -255,7 +255,7 @@ modal run skills/modal-parallel-search/scripts/modal_search_cli.py --help
 Search results usually include title, URL, and snippet. When you want deeper context, add `--fetch-pages` to fetch the top results for each query in parallel and attach extracted readable text.
 
 ```bash
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+modal run scripts/modal_search_cli.py \
   --query "Modal serverless pricing examples" \
   --max-results 5 \
   --fetch-pages \
@@ -265,7 +265,7 @@ modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
 Markdown output is the default because it is easy for humans and LLMs to continue working with. Use JSON if another tool needs a structured payload:
 
 ```bash
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+modal run scripts/modal_search_cli.py \
   --query "Modal serverless pricing examples" \
   --fetch-pages \
   --output-format json
@@ -276,7 +276,7 @@ modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
 By default, the CLI prints Markdown notes grouped by query, with source URLs, snippets, and optional fetched page extracts. This makes the output directly useful as a research scratchpad for coding agents.
 
 ```bash
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+modal run scripts/modal_search_cli.py \
   --queries-json '["Modal Python serverless", "Modal web endpoints"]' \
   --max-results 3
 ```
@@ -286,7 +286,7 @@ modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
 Use `--benchmark` to compare sequential query execution against the default parallel fan-out. The benchmark runs the same query set sequentially and in parallel, then reports wall-clock timings and speedup.
 
 ```bash
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+modal run scripts/modal_search_cli.py \
   --queries-file examples/benchmark_queries.txt \
   --max-results 3 \
   --benchmark
@@ -354,14 +354,11 @@ JSON output with `--output-format json`:
 
 ```text
 .
+├── SKILL.md
 ├── package.json
 ├── scripts/
-│   └── install-skill.sh
-├── skills/
-│   └── modal-parallel-search/
-│       ├── SKILL.md
-│       └── scripts/
-│           └── modal_search_cli.py
+│   ├── install-skill.sh
+│   └── modal_search_cli.py
 └── examples/
     ├── benchmark_queries.txt
     └── queries.txt

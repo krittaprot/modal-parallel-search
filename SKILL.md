@@ -40,7 +40,7 @@ modal run scripts/modal_search_cli.py --query "search query"
 From the repository root, run:
 
 ```bash
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py --query "search query"
+modal run scripts/modal_search_cli.py --query "search query"
 ```
 
 **Multi-query via `;;` separator** (quick and shell-friendly):

@@ -21,7 +21,7 @@ if [ -L "$SKILL_DIR" ] || [ -e "$SKILL_DIR" ]; then
   rm -rf "$SKILL_DIR"
 fi
 
-ln -s "$REPO_DIR/skills/modal-parallel-search" "$SKILL_DIR"
+ln -s "$REPO_DIR" "$SKILL_DIR"
 
 echo ""
 echo "Installed Modal Parallel Search skill:"
