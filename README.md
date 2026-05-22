@@ -25,6 +25,69 @@ python3 -m pip install modal
 modal setup
 ```
 
+## First-time Modal setup
+
+You need the Modal CLI installed and authenticated once on your local machine.
+
+### 1. Install the Modal Python package / CLI
+
+Recommended, inside a virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install --upgrade pip
+python3 -m pip install modal
+```
+
+Or install into your current Python environment:
+
+```bash
+python3 -m pip install modal
+```
+
+Verify the CLI is available:
+
+```bash
+modal --version
+```
+
+### 2. Create or connect your Modal account
+
+For an interactive local machine, run:
+
+```bash
+modal setup
+```
+
+This opens a browser flow to create/sign in to your Modal account and stores local credentials, typically in `~/.modal.toml`.
+
+### 3. If you already have a token
+
+If you created a token in the Modal dashboard or need to configure a non-browser environment, set it directly:
+
+```bash
+modal token set --token-id "YOUR_TOKEN_ID" --token-secret "YOUR_TOKEN_SECRET"
+```
+
+For CI or other automated environments, Modal also supports environment variables:
+
+```bash
+export MODAL_TOKEN_ID="YOUR_TOKEN_ID"
+export MODAL_TOKEN_SECRET="YOUR_TOKEN_SECRET"
+```
+
+Never commit token values to this repo.
+
+### 4. Verify auth with this repo
+
+```bash
+modal token info
+modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --query "Modal Python serverless" \
+  --max-results 1
+```
+
 Run a single search:
 
 ```bash

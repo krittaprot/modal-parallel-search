@@ -8,6 +8,27 @@ license: MIT
 
 Use the repo CLI when you need lightweight no-key web search from an agent.
 
+## First-time setup
+
+If Modal is not installed or authenticated locally:
+
+```bash
+python3 -m pip install modal
+modal setup
+modal token info
+```
+
+For headless environments or pre-created tokens:
+
+```bash
+modal token set --token-id "YOUR_TOKEN_ID" --token-secret "YOUR_TOKEN_SECRET"
+# or
+export MODAL_TOKEN_ID="YOUR_TOKEN_ID"
+export MODAL_TOKEN_SECRET="YOUR_TOKEN_SECRET"
+```
+
+Never commit token values.
+
 From this skill folder root, run:
 
 ```bash

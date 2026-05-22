@@ -111,6 +111,8 @@ def search_one(spec: dict[str, Any]) -> dict[str, Any]:
     logging.basicConfig(level=logging.INFO, format="%(message)s", force=True)
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("ddgs").setLevel(logging.WARNING)
+    logging.getLogger("primp").setLevel(logging.WARNING)
 
     import contextlib
     import io
@@ -151,7 +153,8 @@ def search_one(spec: dict[str, Any]) -> dict[str, Any]:
                 }
             )
             with DDGS(timeout=20) as ddgs:
-                with contextlib.redirect_stdout(io.StringIO()):
+                sink = io.StringIO()
+                with contextlib.redirect_stdout(sink), contextlib.redirect_stderr(sink):
                     results = list(
                         ddgs.text(
                             query,
