@@ -15,7 +15,7 @@ It works with any terminal-capable coding agent: Pi, Claude Code, Codex-style ag
 - **What you need:** a terminal, Python/uv or pip, and a Modal account/token.
 - **Search API keys:** none required for search. The CLI uses [`ddgs`](https://pypi.org/project/ddgs/) backends.
 - **Typical output:** Markdown, because it is easy for people and AI agents to read.
-- **Cost note:** this workload is intentionally tiny, but Modal usage depends on your account and current Modal pricing. Check your Modal dashboard and pricing page if cost matters.
+- **Cost note:** this workload uses near $0 on Modal — the searches are tiny, short-lived CPU bursts. As of May 23, 2026, Modal gives you **$30 USD/month in free credits every month** once you add a credit card, so normal usage of this tool is effectively free.
 
 ## Fastest quick start
 
