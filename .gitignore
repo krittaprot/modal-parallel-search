@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Modal/local output
+.modal/
+*.log
+
+# Node/npm, if the package is later published
+node_modules/
+npm-debug.log*

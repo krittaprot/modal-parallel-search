@@ -1,0 +1,30 @@
+{
+  "name": "modal-parallel-search",
+  "version": "0.1.0",
+  "description": "A Pi skill that gives coding agents no-key parallel web search powered by Modal serverless Python.",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi-skill",
+    "coding-agents",
+    "modal",
+    "serverless",
+    "web-search"
+  ],
+  "homepage": "https://github.com/krittaprot/modal-parallel-search#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krittaprot/modal-parallel-search.git"
+  },
+  "bugs": {
+    "url": "https://github.com/krittaprot/modal-parallel-search/issues"
+  },
+  "pi": {
+    "skills": [
+      "skills"
+    ]
+  },
+  "scripts": {
+    "smoke": "python3 -m py_compile skills/modal-parallel-search/scripts/modal_search_cli.py"
+  }
+}
