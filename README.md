@@ -6,6 +6,14 @@
 
 This is the pattern: **coding agents are great at using CLIs; Modal is great at bursting compute on demand.** Put them together and suddenly an agent can do parallel research without you building infrastructure.
 
+## Why Modal instead of local fan-out?
+
+When an agent gets ambitious, "just run a few searches" can turn into multiple Python processes, dependency installs, browser-ish HTTP clients, or even Docker containers. On a small machine like a MacBook Air M1, that kind of local fan-out can make the laptop hot, drain battery, and steal resources from the editor you are actually trying to use.
+
+Modal moves that bursty work off your laptop. Your Mac stays a thin control plane: Pi calls a CLI, the CLI asks Modal for serverless containers, and the real work runs in the cloud. This is especially nice for coding-agent workflows because you get parallelism without turning your development machine into the cluster.
+
+It also makes the workflow portable. Once Modal auth is set up, the same command works from a MacBook Air, a Mac mini, or any other machine with the repo and the Modal CLI installed. Clone the repo, authenticate Modal, run the CLI — the compute environment is defined in code by the Modal image, not by whatever happens to be installed on that specific Mac.
+
 ## Why this is fun
 
 - **Parallel by default** — send 1 query or 20 angles; each query gets its own Modal function call.
