@@ -34,65 +34,69 @@ from urllib.request import Request, urlopen
 # ---------------------------------------------------------------------------
 
 _USAGE = """\
-Modal Parallel Search — lightweight web search fanned out across Modal.
+Modal Parallel Search — web search for AI agents, powered by Modal.
+
+If you are new: run this first from the repo/skill folder:
+
+  modal run scripts/modal_search_cli.py --query "Modal Python serverless" --max-results 1
 
 USAGE:
   modal run scripts/modal_search_cli.py [OPTIONS]
 
 QUERY INPUT (pick one or combine):
   --query          One query, or multiple joined by ";;".
-                   modal run modal_search_cli.py --query "your query"
-                   modal run modal_search_cli.py --query "q1;;q2;;q3"
+                   Example: --query "your query"
+                   Example: --query "q1;;q2;;q3"
 
-  --queries-json   JSON array of query strings (recommended for 3+ queries).
-                   modal run modal_search_cli.py --queries-json '["q1","q2"]'
+  --queries-json   JSON array of query strings. Best for agents and 3+ queries.
+                   Example: --queries-json '["q1", "q2"]'
 
-  --queries-file   File with one query per line (# comments and blanks OK).
+  --queries-file   File with one query per line. Blank lines and # comments are OK.
 
 SEARCH OPTIONS:
-  --max-results    Results per query.           [default: 5]
-  --backend        Search engine backend.       [default: auto]
+  --max-results    Results per query.              [default: 5]
+  --backend        Search backend.                 [default: auto]
                    Choices: auto, yahoo, brave, duckduckgo
-  --region         Search region (DDGS locale). [default: us-en]
-  --safesearch     Safe-search level.           [default: moderate]
+  --region         Search region / locale.         [default: us-en]
+  --safesearch     Safe-search level.              [default: moderate]
                    Choices: on, moderate, off
-  --timelimit      Time filter.                 [default: none]
+  --timelimit      Time filter.                    [default: none]
                    Choices: d (day), w (week), m (month), y (year)
 
 PAGE FETCH + EXTRACT:
   --fetch-pages    Fetch and extract readable text from top search results.
-                   Boolean flag.                [default: false]
   --fetch-top-n    Number of top results per query to fetch. [default: 3]
-  --fetch-chars    Max extracted chars per page. [default: 4000]
+  --fetch-chars    Max extracted chars per page.   [default: 4000]
 
 OUTPUT:
-  --output-format  markdown or json.             [default: markdown]
-                   Markdown is human-readable and easy for LLMs to continue working with.
+  --output-format  markdown or json.               [default: markdown]
+                   Markdown is best for people/LLMs. JSON is best for tools.
+                   For clean JSON stdout, use: modal run -q ... --output-format json
+  --show-events    Print spawn/status events before the final output.
+                   Leave this off when another tool needs clean JSON.
 
 BENCHMARK:
-  --benchmark      Also compare sequential vs parallel search wall time.
-                   Boolean flag.                [default: false]
+  --benchmark      Compare sequential vs parallel search wall time.
 
 NOTES:
-  • Each query spawns a separate Modal container — all run in parallel.
-  • "auto" backend tries multiple engines; retries up to 3x on failure.
+  • Each query spawns a separate Modal container, so many queries run in parallel.
   • Repeated --query flags do NOT accumulate (Modal limitation).
-    Use ;; separator or --queries-json for multi-query.
+    Use ;;, --queries-json, or --queries-file for multiple queries.
+  • If Modal says you are not logged in, run: modal setup
 
 EXAMPLES:
   # Single quick search
-  modal run scripts/modal_search_cli.py --query "Modal Python serverless"
+  modal run scripts/modal_search_cli.py --query "Modal Python serverless" --max-results 1
 
-  # 5 parallel queries, last-week results
+  # 5 parallel queries, filtered to last week
   modal run scripts/modal_search_cli.py \\
-    --queries-json '["AI chips","OpenAI news","AI regulation"]' \\
+    --queries-json '["AI chips", "OpenAI news", "AI regulation"]' \\
     --timelimit w --max-results 5
 
-  # Fetch/extract top pages and render markdown notes
+  # Fetch/extract top pages and render Markdown notes
   modal run scripts/modal_search_cli.py \\
     --query "Modal serverless pricing examples" \\
-    --max-results 5 --fetch-pages --fetch-top-n 3 \\
-    --output-format markdown
+    --max-results 5 --fetch-pages --fetch-top-n 3
 
   # Benchmark sequential vs parallel wall time
   modal run scripts/modal_search_cli.py \\
@@ -104,6 +108,14 @@ EXAMPLES:
 def _print_help_and_exit() -> None:
     print(_USAGE)
     sys.exit(0)
+
+
+def _user_error(message: str) -> None:
+    """Print a short, beginner-friendly error and stop without a Python traceback."""
+    print(f"Error: {message}", file=sys.stderr)
+    print("\nRun this for examples and option help:", file=sys.stderr)
+    print("  modal run scripts/modal_search_cli.py --help", file=sys.stderr)
+    raise SystemExit(2)
 
 
 # Modal's click parser grabs --help before main() runs, so we intercept at
@@ -435,13 +447,21 @@ def load_queries(
         queries.extend([p for p in parts if p])
 
     if queries_json:
-        loaded = json.loads(queries_json)
+        try:
+            loaded = json.loads(queries_json)
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                '--queries-json must be valid JSON, for example: '
+                '\'["first query", "second query"]\''
+            ) from exc
         if not isinstance(loaded, list) or not all(isinstance(item, str) for item in loaded):
             raise ValueError("--queries-json must be a JSON array of strings")
         queries.extend(loaded)
 
     if queries_file:
         path = Path(queries_file).expanduser()
+        if not path.exists():
+            raise ValueError(f"--queries-file not found: {path}")
         file_queries = [
             line.strip()
             for line in path.read_text(encoding="utf-8").splitlines()
@@ -697,33 +717,40 @@ def main(
     fetch_chars: int = 4000,
     output_format: str = "markdown",
     benchmark: bool = False,
+    show_events: bool = False,
 ) -> None:
     """Modal local entrypoint — use --help for full usage guide."""
     if safesearch not in {"on", "moderate", "off"}:
-        raise ValueError("--safesearch must be one of: on, moderate, off")
+        _user_error("--safesearch must be one of: on, moderate, off")
 
     if timelimit and timelimit not in {"d", "w", "m", "y"}:
-        raise ValueError("--timelimit must be one of: d, w, m, y")
+        _user_error("--timelimit must be one of: d, w, m, y")
+
+    if backend not in {"auto", "yahoo", "brave", "duckduckgo"}:
+        _user_error("--backend must be one of: auto, yahoo, brave, duckduckgo")
 
     if max_results < 1:
-        raise ValueError("--max-results must be at least 1")
+        _user_error("--max-results must be at least 1")
 
     if fetch_top_n < 1:
-        raise ValueError("--fetch-top-n must be at least 1")
+        _user_error("--fetch-top-n must be at least 1")
 
     if fetch_chars < 200:
-        raise ValueError("--fetch-chars must be at least 200")
+        _user_error("--fetch-chars must be at least 200")
 
     if output_format not in {"json", "markdown"}:
-        raise ValueError("--output-format must be one of: json, markdown")
+        _user_error("--output-format must be one of: json, markdown")
 
-    queries = load_queries(
-        query=query,
-        queries_json=queries_json,
-        queries_file=queries_file,
-    )
+    try:
+        queries = load_queries(
+            query=query,
+            queries_json=queries_json,
+            queries_file=queries_file,
+        )
+    except (OSError, ValueError) as exc:
+        _user_error(str(exc))
 
-    emit_events = output_format == "json"
+    emit_events = show_events
     started = time.monotonic()
     if emit_events:
         print(

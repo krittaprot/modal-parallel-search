@@ -1,7 +1,7 @@
 {
   "name": "modal-parallel-search",
   "version": "0.1.0",
-  "description": "A Pi skill that gives coding agents no-key parallel web search powered by Modal serverless Python.",
+  "description": "A beginner-friendly Agent Skill and CLI that gives coding agents no-key parallel web search powered by Modal serverless Python.",
   "license": "MIT",
   "keywords": [
     "pi-package",
@@ -25,6 +25,7 @@
     ]
   },
   "scripts": {
-    "smoke": "python3 -m py_compile scripts/modal_search_cli.py"
+    "smoke": "python3 -m py_compile scripts/modal_search_cli.py && bash -n scripts/install-skill.sh",
+    "help": "python3 scripts/modal_search_cli.py --help"
   }
 }

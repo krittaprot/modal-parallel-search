@@ -2,38 +2,24 @@
 
 <img width="1280" height="900" alt="modal-parallel-search-global-news" src="https://github.com/user-attachments/assets/eae93c64-ebda-4900-8faa-16a0d679574d" />
 
-> Give your coding agent a tiny web-search superpower: one CLI command fans many searches out across Modal serverless containers and returns clean Markdown notes by default, or JSON when requested.
+> A tiny web-search superpower for AI coding agents: run one command, fan out several searches across Modal serverless containers, and get clean Markdown notes back.
 
-`modal-parallel-search` is a Pi skill + Modal app for agentic web search. It is intentionally small: no browser, no API keys for search, no hosted service to maintain. Your agent shells out to `modal run`, Modal spins up lightweight Python containers, each query runs independently, and the results come back as human-readable Markdown notes by default, or as JSON with `--output-format json`.
+`modal-parallel-search` is an Agent Skill plus a Modal-powered CLI. It is useful when an AI agent needs current web information but you do not want to set up a search API key, browser automation, a hosted service, or local fan-out scripts.
 
-Although this repo ships as a Pi package, the core idea is **not Pi-specific**. We built this skill for any AI coding agent with terminal access: OpenClaw, Hermes, Codex, Claude Code, Pi, and so on. If the agent can run a shell command, it can use this Modal-powered CLI.
+It works with any terminal-capable coding agent: Pi, Claude Code, Codex-style agents, OpenClaw, Hermes, or your own agent loop. If the agent can run `modal run ...`, it can use this tool.
 
-This is the pattern: **coding agents are great at using CLIs; Modal is great at bursting compute on demand.** Put them together and suddenly an agent can do parallel research without you building infrastructure.
+## In plain English
 
-## Why Modal instead of local fan-out?
+- **What it does:** searches the web and returns research notes.
+- **Why Modal:** the bursty work runs in short-lived cloud containers instead of on your laptop.
+- **What you need:** a terminal, Python/uv or pip, and a Modal account/token.
+- **Search API keys:** none required for search. The CLI uses [`ddgs`](https://pypi.org/project/ddgs/) backends.
+- **Typical output:** Markdown, because it is easy for people and AI agents to read.
+- **Cost note:** this workload is intentionally tiny, but Modal usage depends on your account and current Modal pricing. Check your Modal dashboard and pricing page if cost matters.
 
-When an agent gets ambitious, "just run a few searches" can turn into multiple Python processes, dependency installs, browser-ish HTTP clients, or even Docker containers. On a small machine like a MacBook Air M1, that kind of local fan-out can make the laptop hot, drain battery, and steal resources from the editor you are actually trying to use.
+## Fastest quick start
 
-Modal moves that bursty work off your laptop. Your Mac stays a thin control plane: Pi calls a CLI, the CLI asks Modal for serverless containers, and the real work runs in the cloud. This is especially nice for coding-agent workflows because you get parallelism without turning your development machine into the cluster.
-
-It also makes the workflow portable. Once Modal auth is set up, the same command works from a MacBook Air, a Mac mini, or any other machine with the repo and the Modal CLI installed. Clone the repo, authenticate Modal, run the CLI — the compute environment is defined in code by the Modal image, not by whatever happens to be installed on that specific Mac.
-
-## Why this is fun
-
-- **Parallel by default** — send 1 query or 20 angles; each query gets its own Modal function call.
-- **More breadth, faster** — parallel searches let agents explore multiple phrasings, sources, and angles at once, which speeds up wide web research and increases the breadth of information gathered.
-- **Agent-friendly output** — Markdown notes by default for humans and LLMs; structured JSON is available with `--output-format json`.
-- **No search API key required** — powered by [`ddgs`](https://pypi.org/project/ddgs/) backends.
-- **Tiny surface area** — one Python file and one skill file.
-- **Tiny serverless footprint** — `ddgs` is lightweight, and each Modal search container only needs a small CPU/memory slice for a short burst, so typical runs cost extremely close to zero.
-- **Modal free-credit friendly** — As of May 23, 2026, Modal accounts receive **$30/month in free credits after adding a credit card**, and this parallel web search workload typically consumes very near to **$0 USD**.
-- **Agent Skills ready** — place the skill folder at `~/.agents/skills/modal-parallel-search` and any compatible agent can find it.
-
-> Note: you still need a Modal account/CLI. Modal usage may be billed depending on your account, free credits, and current Modal pricing. As of May 23, 2026, Modal gives accounts $30/month in free credits when a credit card is added, and this tool's workload is intentionally tiny, but always check your own usage. Please respect search provider terms and rate limits.
-
-## Quick start
-
-Install the skill into the shared Agent Skills folder, install Modal, then run a smoke test:
+Copy/paste these commands into your terminal:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/krittaprot/modal-parallel-search/main/scripts/install-skill.sh | bash
@@ -44,177 +30,162 @@ modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
   --max-results 1
 ```
 
-The important path is:
+What those commands do:
+
+1. Install this skill into `~/.agents/skills/modal-parallel-search`.
+2. Install the Modal CLI.
+3. Sign in to Modal in your browser.
+4. Run a tiny smoke-test search.
+
+If you do not have `uv`, install Modal with pip instead:
+
+```bash
+python3 -m pip install --user modal
+```
+
+## What gets installed
+
+The installer keeps the repo here:
+
+```text
+~/.agents/skills/.repos/modal-parallel-search
+```
+
+And creates this agent-friendly path:
+
+```text
+~/.agents/skills/modal-parallel-search
+```
+
+The important files are:
 
 ```text
 ~/.agents/skills/modal-parallel-search/
 ├── SKILL.md
-└── scripts/
-    └── modal_search_cli.py
+├── scripts/
+│   ├── install-skill.sh
+│   └── modal_search_cli.py
+└── examples/
+    ├── benchmark_queries.txt
+    └── queries.txt
 ```
 
-Any AI agent with terminal access can use that folder. Agent Skills-aware tools can load `SKILL.md`; simpler terminal agents can directly run the Python CLI.
+Agent Skills-aware tools read `SKILL.md`. Simpler terminal agents can directly call `scripts/modal_search_cli.py`.
 
-## First-time Modal setup
+## First-time setup, slowly
 
-You need the Modal CLI installed and authenticated once on your local machine.
-
-### 1. Install the Modal Python package / CLI
-
-Recommended with [`uv`](https://docs.astral.sh/uv/):
-
-```bash
-uv tool install modal
-```
-
-If you already installed Modal with `uv`, upgrade it with:
-
-```bash
-uv tool upgrade modal
-```
-
-If you do not use `uv`, regular `pip` still works:
-
-```bash
-python3 -m pip install modal
-```
-
-Verify the CLI is available:
+### 1. Make sure Modal is installed
 
 ```bash
 modal --version
 ```
 
-### 2. Create or connect your Modal account
+If that says `command not found`, install Modal:
 
-As of May 23, 2026, Modal gives accounts **$30/month in free credits after adding a credit card**. This parallel web search tool uses short-lived, lightweight CPU containers, so normal searches should consume very near to **$0 USD** against that credit.
+```bash
+uv tool install modal
+```
 
-For an interactive local machine, run:
+Or with pip:
+
+```bash
+python3 -m pip install --user modal
+```
+
+### 2. Sign in to Modal
+
+For a normal laptop/desktop:
 
 ```bash
 modal setup
 ```
 
-This opens a browser flow to create/sign in to your Modal account and stores local credentials, typically in `~/.modal.toml`.
+This opens a browser login flow and stores credentials locally, usually in `~/.modal.toml`.
 
-### 3. If you already have a token
+Then verify:
 
-If you created a token in the Modal dashboard or need to configure a non-browser environment, set it directly:
+```bash
+modal token info
+```
+
+### 3. Headless server or existing token
+
+If you cannot use a browser, create a token in Modal and set it directly:
 
 ```bash
 modal token set --token-id "YOUR_TOKEN_ID" --token-secret "YOUR_TOKEN_SECRET"
 ```
 
-For CI or other automated environments, Modal also supports environment variables:
+For CI or temporary shells:
 
 ```bash
 export MODAL_TOKEN_ID="YOUR_TOKEN_ID"
 export MODAL_TOKEN_SECRET="YOUR_TOKEN_SECRET"
 ```
 
-Never commit token values to this repo.
+Never commit token values to git.
 
-### 4. Verify auth with this repo
+### 4. Run the smoke test
 
 ```bash
-modal token info
-modal run scripts/modal_search_cli.py \
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
   --query "Modal Python serverless" \
   --max-results 1
 ```
 
-Run a single search:
+If you see `# Search research notes`, it worked.
 
-```bash
-modal run scripts/modal_search_cli.py \
-  --query "Modal Python serverless coding agents" \
-  --max-results 3
-```
+## Install as an Agent Skill
 
-Run several searches in parallel:
-
-```bash
-modal run scripts/modal_search_cli.py \
-  --queries-json '["pi coding agent", "Modal serverless Python", "coding agents CLI tools"]' \
-  --max-results 5 \
-  --timelimit w
-```
-
-Or with a file:
-
-```bash
-modal run scripts/modal_search_cli.py \
-  --queries-file examples/queries.txt
-```
-
-## Install as an agent skill
-
-### Recommended: one-command install
+### Recommended installer
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/krittaprot/modal-parallel-search/main/scripts/install-skill.sh | bash
 ```
 
-This keeps the full repo checkout here:
+You can customize the install location:
 
-```text
-~/.agents/skills/.repos/modal-parallel-search
+```bash
+AGENTS_SKILLS_DIR="$HOME/.agents/skills" bash scripts/install-skill.sh
 ```
 
-And symlinks the actual skill folder here:
+You can point the installer at a fork:
 
-```text
-~/.agents/skills/modal-parallel-search
-```
-
-The skill folder is the part agents need. `SKILL.md` should be directly inside it:
-
-```text
-~/.agents/skills/modal-parallel-search/
-├── SKILL.md
-└── scripts/
-    └── modal_search_cli.py
+```bash
+MODAL_PARALLEL_SEARCH_REPO_URL="https://github.com/YOU/modal-parallel-search.git" \
+  bash scripts/install-skill.sh
 ```
 
 ### Manual install
 
-If you do not want to pipe a script into `bash`, run the same steps manually:
+If you prefer not to pipe a script into `bash`:
 
 ```bash
 mkdir -p ~/.agents/skills/.repos
 git clone https://github.com/krittaprot/modal-parallel-search.git \
   ~/.agents/skills/.repos/modal-parallel-search
 rm -rf ~/.agents/skills/modal-parallel-search
-ln -s ~/.agents/skills/.repos/modal-parallel-search/skills/modal-parallel-search \
+ln -s ~/.agents/skills/.repos/modal-parallel-search \
   ~/.agents/skills/modal-parallel-search
 ```
 
-### Use from any terminal-capable agent
-
-Any AI agent that can run shell commands can call the CLI directly:
+Check it:
 
 ```bash
-modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
-  --query "recent Modal serverless agent examples"
-```
-
-Agent Skills-compatible tools can additionally read:
-
-```text
-~/.agents/skills/modal-parallel-search/SKILL.md
+ls ~/.agents/skills/modal-parallel-search/SKILL.md
 ```
 
 ### Update later
 
 ```bash
-git -C ~/.agents/skills/.repos/modal-parallel-search pull
+git -C ~/.agents/skills/.repos/modal-parallel-search pull --ff-only
 ```
 
-The symlink at `~/.agents/skills/modal-parallel-search` keeps pointing at the updated skill folder.
+The symlink at `~/.agents/skills/modal-parallel-search` keeps pointing at the updated repo.
 
 ### Pi package alternative
 
-If you prefer Pi's package manager instead, this also works:
+If you use Pi's package manager:
 
 ```bash
 pi install git:github.com/krittaprot/modal-parallel-search
@@ -226,12 +197,47 @@ Then ask Pi to use the skill, or invoke it explicitly:
 /skill:modal-parallel-search search recent Modal serverless agent examples
 ```
 
+## Everyday usage
+
+Run a single search:
+
+```bash
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --query "recent Modal serverless agent examples" \
+  --max-results 3
+```
+
+Run several searches in parallel:
+
+```bash
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --queries-json '["pi coding agent", "Modal serverless Python", "coding agents CLI tools"]' \
+  --max-results 5 \
+  --timelimit w
+```
+
+Use a plain text file with one query per line:
+
+```bash
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --queries-file ~/.agents/skills/modal-parallel-search/examples/queries.txt
+```
+
+Quick multi-query shortcut:
+
+```bash
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --query "Modal pricing;;Modal web endpoints Python;;Modal volumes examples"
+```
+
+> Modal local entrypoints accept `--query` as one scalar value. Repeating `--query` flags does not build a list. Use `;;`, `--queries-json`, or `--queries-file` for multiple queries.
+
 ## CLI options
 
 ```text
 --query          One query, or multiple joined by ";;"
 --queries-json   JSON array of query strings
---queries-file   File with one query per line
+--queries-file   File with one query per line; # comments and blanks are ignored
 --max-results    Results per query [default: 5]
 --backend        auto, yahoo, brave, duckduckgo [default: auto]
 --region         Search region [default: us-en]
@@ -241,67 +247,120 @@ Then ask Pi to use the skill, or invoke it explicitly:
 --fetch-top-n    Top results per query to fetch [default: 3]
 --fetch-chars    Max extracted characters per page [default: 4000]
 --output-format  markdown or json [default: markdown]
+--show-events    Print spawn/status events before final output [default: false]
 --benchmark      Compare sequential vs parallel wall time [default: false]
 ```
 
 Show help:
 
 ```bash
-modal run scripts/modal_search_cli.py --help
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py --help
 ```
 
 ## Page fetch + extract mode
 
-Search results usually include title, URL, and snippet. When you want deeper context, add `--fetch-pages` to fetch the top results for each query in parallel and attach extracted readable text.
+Search results include title, URL, and snippet. Add `--fetch-pages` when snippets are not enough and you want readable text from the top result pages.
 
 ```bash
-modal run scripts/modal_search_cli.py \
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
   --query "Modal serverless pricing examples" \
   --max-results 5 \
   --fetch-pages \
   --fetch-top-n 3
 ```
 
-Markdown output is the default because it is easy for humans and LLMs to continue working with. Use JSON if another tool needs a structured payload:
+Some sites block automated fetching. That is normal. The search result URL and snippet still remain in the notes.
+
+## Markdown and JSON output
+
+Markdown is the default:
 
 ```bash
-modal run scripts/modal_search_cli.py \
-  --query "Modal serverless pricing examples" \
-  --fetch-pages \
-  --output-format json
-```
-
-## Markdown research notes
-
-By default, the CLI prints Markdown notes grouped by query, with source URLs, snippets, and optional fetched page extracts. This makes the output directly useful as a research scratchpad for coding agents.
-
-```bash
-modal run scripts/modal_search_cli.py \
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
   --queries-json '["Modal Python serverless", "Modal web endpoints"]' \
   --max-results 3
 ```
 
-## Benchmark examples
-
-Use `--benchmark` to compare sequential query execution against the default parallel fan-out. The benchmark runs the same query set sequentially and in parallel, then reports wall-clock timings and speedup.
+Use JSON when another tool needs to parse the result. Add Modal's `-q` flag so Modal progress messages do not mix with the JSON:
 
 ```bash
-modal run scripts/modal_search_cli.py \
-  --queries-file examples/benchmark_queries.txt \
+modal run -q ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --query "Modal serverless pricing examples" \
+  --output-format json
+```
+
+## Benchmark parallel fan-out
+
+Use `--benchmark` to compare sequential query execution against parallel fan-out. This runs the same query set two ways and reports wall-clock timings.
+
+```bash
+modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
+  --queries-file ~/.agents/skills/modal-parallel-search/examples/benchmark_queries.txt \
   --max-results 3 \
   --benchmark
 ```
 
+## Troubleshooting
+
+### `modal: command not found`
+
+Install Modal:
+
+```bash
+uv tool install modal
+# or
+python3 -m pip install --user modal
+```
+
+If pip installed it but your shell still cannot find it, restart the terminal or add your Python user scripts directory to `PATH`.
+
+### Modal says you are not authenticated
+
+Run:
+
+```bash
+modal setup
+modal token info
+```
+
+### `git: command not found`
+
+Install Git first. On macOS, running `git --version` usually prompts Apple developer tools installation. On Ubuntu/Debian:
+
+```bash
+sudo apt-get update && sudo apt-get install -y git
+```
+
+### JSON input errors
+
+Use valid JSON with double quotes:
+
+```bash
+--queries-json '["first query", "second query"]'
+```
+
+PowerShell quoting can be different; using `--queries-file` is often easier on Windows.
+
+### No results or backend errors
+
+Search backends can temporarily fail or rate-limit. Try:
+
+```bash
+--backend duckduckgo
+```
+
+Or reduce `--max-results` / query count and retry.
+
 ## How it works
 
-1. The local entrypoint parses one or many queries.
+1. The local Modal entrypoint parses one or many queries.
 2. Each query becomes a serializable search spec.
 3. The CLI calls `search_one.spawn(...)` for every query.
-4. Modal runs each search in a separate lightweight container.
-5. Optional page fetch mode calls `fetch_page.spawn(...)` for top result URLs and extracts readable text.
-6. Results are collected in input order and printed as Markdown by default, or JSON with `--output-format json`.
+4. Modal runs searches in separate lightweight containers.
+5. Optional page-fetch mode calls `fetch_page.spawn(...)` for top result URLs.
+6. Results are collected in input order and printed as Markdown or JSON.
 
-The remote image is deliberately minimal:
+The Modal image is intentionally small:
 
 ```python
 image = (
@@ -312,7 +371,7 @@ image = (
 
 ## Example output shape
 
-Default Markdown output:
+Markdown output:
 
 ```md
 # Search research notes
@@ -330,7 +389,7 @@ Source: https://modal.com/...
 Snippet text...
 ```
 
-JSON output with `--output-format json`:
+JSON output:
 
 ```json
 {
@@ -355,6 +414,7 @@ JSON output with `--output-format json`:
 ```text
 .
 ├── SKILL.md
+├── README.md
 ├── package.json
 ├── scripts/
 │   ├── install-skill.sh
@@ -366,7 +426,9 @@ JSON output with `--output-format json`:
 
 ## Roadmap ideas
 
-- Result caching in a Modal Volume.
+- Optional result caching in a Modal Volume.
+- More beginner-friendly wrappers for common agent workflows.
+- Additional output templates for citations and comparison tables.
 
 ## License
 
