@@ -26,9 +26,10 @@ It also makes the workflow portable. Once Modal auth is set up, the same command
 - **No search API key required** — powered by [`ddgs`](https://pypi.org/project/ddgs/) backends.
 - **Tiny surface area** — one Python file and one skill file.
 - **Tiny serverless footprint** — `ddgs` is lightweight, and each Modal search container only needs a small CPU/memory slice for a short burst, so typical runs cost extremely close to zero.
+- **Modal free-credit friendly** — As of May 23, 2026, Modal accounts receive **$30/month in free credits after adding a credit card**, and this parallel web search workload typically consumes very near to **$0 USD**.
 - **Agent Skills ready** — place the skill folder at `~/.agents/skills/modal-parallel-search` and any compatible agent can find it.
 
-> Note: you still need a Modal account/CLI. Modal usage may be billed depending on your account, free credits, and current Modal pricing. The workload is intentionally tiny, but always check your own usage. Please respect search provider terms and rate limits.
+> Note: you still need a Modal account/CLI. Modal usage may be billed depending on your account, free credits, and current Modal pricing. As of May 23, 2026, Modal gives accounts $30/month in free credits when a credit card is added, and this tool's workload is intentionally tiny, but always check your own usage. Please respect search provider terms and rate limits.
 
 ## Quick start
 
@@ -85,6 +86,8 @@ modal --version
 ```
 
 ### 2. Create or connect your Modal account
+
+As of May 23, 2026, Modal gives accounts **$30/month in free credits after adding a credit card**. This parallel web search tool uses short-lived, lightweight CPU containers, so normal searches should consume very near to **$0 USD** against that credit.
 
 For an interactive local machine, run:
 
