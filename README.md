@@ -19,6 +19,7 @@ It also makes the workflow portable. Once Modal auth is set up, the same command
 ## Why this is fun
 
 - **Parallel by default** — send 1 query or 20 angles; each query gets its own Modal function call.
+- **More breadth, faster** — parallel searches let agents explore multiple phrasings, sources, and angles at once, which speeds up wide web research and increases the breadth of information gathered.
 - **Agent-friendly output** — structured JSON, easy to grep, parse, summarize, or cite.
 - **No search API key required** — powered by [`ddgs`](https://pypi.org/project/ddgs/) backends.
 - **Tiny surface area** — one Python file and one skill file.
