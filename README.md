@@ -4,6 +4,8 @@
 
 `modal-parallel-search` is a Pi skill + Modal app for agentic web search. It is intentionally small: no browser, no API keys for search, no hosted service to maintain. Your agent shells out to `modal run`, Modal spins up lightweight Python containers, each query runs independently, and the results come back in one JSON payload.
 
+Although this repo ships as a Pi package, the core idea is **not Pi-specific**. We built this skill for any AI coding agent with terminal access: OpenClaw, Hermes, Codex, Claude Code, Pi, and so on. If the agent can run a shell command, it can use this Modal-powered CLI.
+
 This is the pattern: **coding agents are great at using CLIs; Modal is great at bursting compute on demand.** Put them together and suddenly an agent can do parallel research without you building infrastructure.
 
 ## Why Modal instead of local fan-out?
