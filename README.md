@@ -1,5 +1,7 @@
 # Modal Parallel Search
 
+<img width="1280" height="760" alt="modal-parallel-search-demo" src="https://github.com/user-attachments/assets/007a359e-0f1c-4ef6-86e1-8954dd03e984" />
+
 > Give your coding agent a tiny web-search superpower: one CLI command fans many searches out across Modal serverless containers and returns clean JSON.
 
 `modal-parallel-search` is a Pi skill + Modal app for agentic web search. It is intentionally small: no browser, no API keys for search, no hosted service to maintain. Your agent shells out to `modal run`, Modal spins up lightweight Python containers, each query runs independently, and the results come back in one JSON payload.
