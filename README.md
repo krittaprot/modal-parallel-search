@@ -33,7 +33,7 @@ It also makes the workflow portable. Once Modal auth is set up, the same command
 ```bash
 git clone https://github.com/krittaprot/modal-parallel-search.git
 cd modal-parallel-search
-python3 -m pip install modal
+uv tool install modal
 modal setup
 ```
 
@@ -43,16 +43,19 @@ You need the Modal CLI installed and authenticated once on your local machine.
 
 ### 1. Install the Modal Python package / CLI
 
-Recommended, inside a virtual environment:
+Recommended with [`uv`](https://docs.astral.sh/uv/):
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install --upgrade pip
-python3 -m pip install modal
+uv tool install modal
 ```
 
-Or install into your current Python environment:
+If you already installed Modal with `uv`, upgrade it with:
+
+```bash
+uv tool upgrade modal
+```
+
+If you do not use `uv`, regular `pip` still works:
 
 ```bash
 python3 -m pip install modal

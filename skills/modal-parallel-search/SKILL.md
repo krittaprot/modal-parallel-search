@@ -13,10 +13,12 @@ Use the repo CLI when you need lightweight no-key web search from an agent.
 If Modal is not installed or authenticated locally:
 
 ```bash
-python3 -m pip install modal
+uv tool install modal
 modal setup
 modal token info
 ```
+
+If `uv` is not available, use `python3 -m pip install modal` instead.
 
 For headless environments or pre-created tokens:
 
