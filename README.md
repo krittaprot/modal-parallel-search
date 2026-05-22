@@ -1,6 +1,6 @@
 # Modal Parallel Search
 
-<img width="1280" height="760" alt="modal-parallel-search-fast-demo" src="https://github.com/user-attachments/assets/df6cc148-fe51-4044-a5e8-4aac801529af" />
+<img width="1280" height="900" alt="modal-parallel-search-global-news" src="https://github.com/user-attachments/assets/eae93c64-ebda-4900-8faa-16a0d679574d" />
 
 > Give your coding agent a tiny web-search superpower: one CLI command fans many searches out across Modal serverless containers and returns clean Markdown notes by default, or JSON when requested.
 
