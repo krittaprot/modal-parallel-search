@@ -221,62 +221,6 @@ Then ask Pi to use the skill, or invoke it explicitly:
 /skill:modal-parallel-search search recent Modal serverless agent examples
 ```
 
-## Demo commands for a GIF
-
-Use a short multi-query command so the recording clearly shows parallel search fan-out:
-
-```bash
-modal run skills/modal-parallel-search/scripts/modal_search_cli.py \
-  --queries-json '["Modal serverless coding agents", "Pi coding agent skills", "AI agent terminal CLI tools"]' \
-  --max-results 2 \
-  --timelimit w
-```
-
-If you installed the skill globally under `~/.agents/skills`, use:
-
-```bash
-modal run ~/.agents/skills/modal-parallel-search/scripts/modal_search_cli.py \
-  --queries-json '["Modal serverless coding agents", "Pi coding agent skills", "AI agent terminal CLI tools"]' \
-  --max-results 2 \
-  --timelimit w
-```
-
-Tip: run the command once before recording so Modal has already built the image. The second run makes a cleaner GIF.
-
-### Record the terminal GIF with VHS
-
-Install [VHS](https://github.com/charmbracelet/vhs):
-
-```bash
-brew install vhs
-```
-
-Then record the included demo tape:
-
-```bash
-vhs examples/demo.tape
-```
-
-This writes:
-
-```text
-examples/modal-parallel-search-demo.gif
-```
-
-Or create your own tape with this minimal content:
-
-```tape
-Output demo.gif
-Set Shell "bash"
-Set FontSize 18
-Set Width 1280
-Set Height 760
-
-Type "modal run skills/modal-parallel-search/scripts/modal_search_cli.py --queries-json '[\"Modal serverless coding agents\", \"Pi coding agent skills\", \"AI agent terminal CLI tools\"]' --max-results 2 --timelimit w"
-Enter
-Sleep 14s
-```
-
 ## CLI options
 
 ```text
@@ -340,14 +284,13 @@ image = (
 ├── package.json
 ├── scripts/
 │   └── install-skill.sh
-├── examples/
-│   ├── demo.tape
-│   └── queries.txt
 ├── skills/
 │   └── modal-parallel-search/
 │       ├── SKILL.md
 │       └── scripts/
 │           └── modal_search_cli.py
+└── examples/
+    └── queries.txt
 ```
 
 ## Roadmap ideas
