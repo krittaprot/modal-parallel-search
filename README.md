@@ -23,9 +23,10 @@ It also makes the workflow portable. Once Modal auth is set up, the same command
 - **Agent-friendly output** — structured JSON, easy to grep, parse, summarize, or cite.
 - **No search API key required** — powered by [`ddgs`](https://pypi.org/project/ddgs/) backends.
 - **Tiny surface area** — one Python file and one skill file.
+- **Tiny serverless footprint** — `ddgs` is lightweight, and each Modal search container only needs a small CPU/memory slice for a short burst, so typical runs cost extremely close to zero.
 - **Pi package ready** — install from GitHub and expose it as `/skill:modal-parallel-search`.
 
-> Note: you still need a Modal account/CLI. Modal usage may be billed depending on your account and free credits. Please respect search provider terms and rate limits.
+> Note: you still need a Modal account/CLI. Modal usage may be billed depending on your account, free credits, and current Modal pricing. The workload is intentionally tiny, but always check your own usage. Please respect search provider terms and rate limits.
 
 ## Quick start
 
